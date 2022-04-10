@@ -25,6 +25,9 @@
 
 # Example
 # include("myfile.jl")
+include("algo_zeroth_order.jl")
+include("algo_first_order.jl")
+include("algo_util.jl")
 
 
 """
@@ -32,7 +35,7 @@
 
 Arguments:
     - `f`: Function to be optimized
-    - `g`: Gradient function for `f`
+    - `∇f`: Gradient function for `f`
     - `x0`: (Vector) Initial position to start from
     - `n`: (Int) Number of evaluations allowed. Remember `g` costs twice of `f`
     - `prob`: (String) Name of the problem. So you can use a different strategy for each problem. E.g. "simple1", "secret2", etc.
@@ -40,7 +43,17 @@ Arguments:
 Returns:
     - The location of the minimum
 """
-function optimize(f, g, x0, n, prob)
-    x_best = x0
-    return x_best
+function optimize(f, ∇f, x0, n, prob)
+    # method = GradientDescent(3e-3)
+    # method = GDMomentum(α=3e-4, β=0.9)
+    method = GDMomentumNesterov(α=3e-4, β=0.8)
+    # method = Adam(α=3e-4, v_decay=0.6)
+    # method = GDApproxLineSearch()
+    x = solve(method, f, ∇f, x0, 9)
+    
+    # x = hooke_jeeves(f, x0, 0.5)
+
+    # println("Pre: $(round.(x0; digits=3)) -> $(round(f(x0); digits=3))")
+    # println("Pos: $(round.(x; digits=3)) -> $(round(f(x); digits=3)) \n")
+    return x
 end
