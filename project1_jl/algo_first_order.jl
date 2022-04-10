@@ -82,3 +82,18 @@ function step!(M::Adam, f, ∇f, x)
     ŝ = s ./ (1 - β2 ^ k)
     return x - α * v̂ ./ (sqrt.(ŝ) .+ ϵ)
 end
+
+
+# Gradient Descent + Backtracking Line Search
+@with_kw mutable struct GDApproxLineSearch <: FirstOrder
+    α = 3e-3
+    approx_line_search = backtracking_line_search
+end
+function step!(M::GDApproxLineSearch, f, ∇f, x)
+    @unpack α, approx_line_search = M
+
+    g = ∇f(x)
+    α = approx_line_search(f, ∇f, x, -g, α)
+    # println(α)
+    return x - α * g 
+end
