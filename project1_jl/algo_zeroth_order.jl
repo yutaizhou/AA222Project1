@@ -1,25 +1,30 @@
 using Parameters
+include("helpers.jl")
 
 abstract type ZerothOrder end
+abstract type HookeJeevesMethod <: ZerothOrder end
 
-function solve(M::ZerothOrder, f, x0)
+function solve(M::HookeJeevesMethod, f, x0, max_iters)
     init!(M, f, x0)
     x, y, terminate = x0, f(x0), false
-    while !terminate
+
+    while !terminate && (COUNTERS[string(f)] < max_iters - M.evals_per_iter)
         x, y, terminate = step!(M, f, x, y)
     end
     return x    
 end
 
 # Hooke Jeeves
-@with_kw mutable struct HookeJeeves <: ZerothOrder
+@with_kw mutable struct HookeJeeves <: HookeJeevesMethod
     α = 1e-2
     ϵ = 1e-4
     γ = 0.5
     n = nothing
+    evals_per_iter = nothing
 end
 function init!(M::HookeJeeves, f, x)
     M.n = length(x)
+    M.evals_per_iter = 2 * M.n
 end
 function step!(M::HookeJeeves, f, x, y)
     @unpack α, ϵ, γ, n = M

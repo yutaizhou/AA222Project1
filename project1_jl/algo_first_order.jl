@@ -5,10 +5,10 @@ using Parameters
 include("algo_util.jl")
 
 abstract type FirstOrder <: DescentDirectionMethod end
-function solve(M::FirstOrder, f, ∇f, x0, n)
+function solve(M::FirstOrder, f, ∇f, x0, max_iters)
     init!(M, f, ∇f, x0)
     x = x0
-    for i in 1:n
+    for i in 1:max_iters
         x = step!(M, f, ∇f, x)
     end
     return x
