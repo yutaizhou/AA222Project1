@@ -8,9 +8,13 @@ function solve(M::HookeJeevesMethod, f, x0, max_iters)
     init!(M, f, x0)
     x, y, terminate = x0, f(x0), false
 
-    while !terminate && (COUNTERS[string(f)] < max_iters - M.evals_per_iter)
+    while !terminate 
         x, y, terminate = step!(M, f, x, y)
-    end
+        
+        if (COUNTERS[string(f)] >= max_iters - M.evals_per_iter)
+            break
+        end
+    end 
     return x    
 end
 
