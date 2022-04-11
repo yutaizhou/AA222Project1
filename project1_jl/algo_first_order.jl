@@ -5,18 +5,19 @@ using Parameters
 include("algo_util.jl")
 
 abstract type FirstOrder <: DescentDirectionMethod end
-function solve(M::FirstOrder, f, ∇f, x0, max_iters)
+function solve(M::FirstOrder, f, ∇f, x0, max_iters; num_eval_termination=true)
     init!(M, f, ∇f, x0)
-    x = x0
-    i = 0
+    x_hist = [x0]
+    x, i = x0, 0 
     while i < max_iters 
         x = step!(M, f, ∇f, x)
+        push!(x_hist, x)
         i += 1
-        if (COUNTERS[string(∇f)]*2 == max_iters) # 2 calls per iteration
+        if num_eval_termination && (COUNTERS[string(∇f)]*2 == max_iters) # 2 calls per iteration
             break
         end
     end
-    return x
+    return x, x_hist
 end
 
 # Vanilla Gradient Descent
