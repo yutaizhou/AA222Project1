@@ -8,8 +8,13 @@ abstract type FirstOrder <: DescentDirectionMethod end
 function solve(M::FirstOrder, f, ∇f, x0, max_iters)
     init!(M, f, ∇f, x0)
     x = x0
-    for i in 1:max_iters
+    i = 0
+    while i < max_iters 
         x = step!(M, f, ∇f, x)
+        i += 1
+        if (COUNTERS[string(∇f)]*2 == max_iters) # 2 calls per iteration
+            break
+        end
     end
     return x
 end
