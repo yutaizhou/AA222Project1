@@ -1,7 +1,5 @@
 using Parameters
 
-basis(i, n) = [k == i ? 1.0 : 0.0 for k in 1:n]
-
 abstract type ZerothOrder end
 
 function solve(M::ZerothOrder, f, x0)
