@@ -50,3 +50,58 @@ function step!(M::HookeJeeves, f, x, y)
     terminate = (M.α <= ϵ ? true : false)
     return x_best, y_best, terminate
 end
+
+# Hooke Jeeves Dynamic w/ Eager execution
+@with_kw mutable struct HookeJeevesDynamic <: ZerothOrder
+    α = 1e-2
+    ϵ = 1e-4
+    γ = 0.5
+    n = nothing
+    evals_per_iter = nothing
+    D = nothing # directions to search in, need to store it for permutating order
+end
+function init!(M::HookeJeevesDynamic, f, x)
+    M.n = length(x)
+    M.evals_per_iter = 2 * M.n
+    M.D = [sgn * basis(i, M.n) for i in 1:M.n for sgn in (-1, +1)]
+end
+function step!(M::HookeJeevesDynamic, f, x, y, idx_best_prev)
+    @unpack α, ϵ, γ, n, D = M
+    improved, terminate, idx_best = false, false, 1
+
+    x_best, y_best = x, y 
+    D_best_prev = D[idx_best_prev]
+    D = pushfirst!(deleteat!(D, idx_best_prev), D_best_prev)
+    xs_new = [x + d for d in D]
+
+    for (idx, x_new) in enumerate(xs_new)
+        y_new = f(x_new)
+        if y_new < y_best
+            x_best, y_best = x_new, y_new
+            improved = true
+            idx_best = idx
+            break
+        end
+    end
+
+    M.α *= (!improved ? γ : 1)
+    terminate = (M.α <= ϵ ? true : false)
+    return x_best, y_best, terminate, idx_best
+end
+
+function solve(M::HookeJeevesDynamic, f, x0, max_iters, num_eval_termination=true)
+    init!(M, f, x0)
+    x_hist = [x0]
+    x, y, terminate, idx = x0, f(x0), false, 1
+
+    while !terminate && (COUNTERS[string(f)] < max_iters - M.evals_per_iter)
+        x, y, terminate, idx = step!(M, f, x, y, idx)
+        push!(x_hist, x)
+
+        if num_eval_termination && (COUNTERS[string(f)] >= max_iters - M.evals_per_iter)
+            break
+        end
+    end
+    return x, x_hist
+end
+

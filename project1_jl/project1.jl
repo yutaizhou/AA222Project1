@@ -31,7 +31,7 @@ using Dates, DataFrames
 include("algo_zeroth_order.jl")
 include("algo_first_order.jl")
 include("algo_util.jl")
-include("utils.jl")
+include("plot.jl")
 
 
 """
