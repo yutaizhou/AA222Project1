@@ -4,15 +4,13 @@ using Statistics
 include("algo_util.jl")
 
 abstract type FirstOrder <: DescentDirectionMethod end
-function solve(M::FirstOrder, f, ∇f, x0, max_iters; num_eval_termination=true)
-    init!(M, f, ∇f, x0)
-    x_hist = [x0]
-    x, i = x0, 0 
-    while i < max_iters 
+function solve(M::FirstOrder, f, ∇f, x, max_iters; num_eval_termination=true)
+    init!(M, f, ∇f, x)
+    x_hist = [x]
+    while true
         x = step!(M, f, ∇f, x)
         push!(x_hist, x)
-        i += 1
-        if num_eval_termination && (COUNTERS[string(∇f)]*2 == max_iters) # 2 calls per iteration
+        if num_eval_termination && (count(∇f) >= max_iters/2) # 2 calls per iteration
             break
         end
     end
