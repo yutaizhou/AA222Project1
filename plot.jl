@@ -19,17 +19,17 @@ end
 function get_x_hist(prob_name, f, ∇f, x0, n)
     x_hist = []
     method = nothing
-    if     prob_name == "simple1"
-        method = GDMomentumNesterov(α=3e-4, β=0.8)
-        _, x_hist = solve(method, f, ∇f, x0, n/2; num_eval_termination = false)
+    if prob_name == "simple1"
+        method = HookeJeevesDynamic(α=0.3, γ=0.3)
+        _, x_hist = solve(method, f, x0, n; num_eval_termination=false)
 
-    elseif prob_name == "simple2"
-        method = HookeJeeves(α=1.0)
-        _, x_hist = solve(method, f, x0, n; num_eval_termination = false)
+    elseif prob_name == "simple2" 
+        method = HookeJeevesDynamic(α=0.3)
+        _, x_hist = solve(method, f, x0, n; num_eval_termination=false)
 
     elseif prob_name == "simple3"
-        method = GDMomentumNesterov(α=1e-3, β=0.9)
-        _, x_hist = solve(method, f, ∇f, x0, n; num_eval_termination = false)
+        method = HookeJeevesDynamic(α=0.3)
+        _, x_hist = solve(method, f, x0, n; num_eval_termination=false)
     end
     return x_hist, string(typeof(method))
 end
@@ -60,15 +60,13 @@ for (prob_name, (f, ∇f, x_init_fn, n)) in PROBS
         contour(xr, yr, rosenbrock_plot,
             levels = [10,25,50,100,200,250,300], colorbar = false, c=cgrad(:viridis, rev = true), legend = false, title=title,
             xlims =(-2,2), ylims =(-2,2), xlabel = "x₁", ylabel = "x₂", aspectratio = :equal, clim =(2,500)
-            )
+        )
 
         plot!([data[1].x[i][1] for i = 1:length(data[1].x)], [data[1].x[i][2] for i = 1:length(data[1].x)], color = :black, arrow=(:closed, 0.2))
         for i in 2:3
             plot!([data[i].x[j][1] for j = 1:length(data[i].x)], [data[i].x[j][2] for j = 1:length(data[i].x)], color = :black, arrow=(:closed, 0.2))
         end
-        
         savefig(outputdir(outputdir_subpath, "contour_rosenbrock_$(method_name).png"))
-
     end
 end
 
