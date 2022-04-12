@@ -95,11 +95,10 @@ end
     α = 3e-3
     approx_line_search = backtracking_line_search
 end
+init!(M::GDApproxLineSearch, f, ∇, x) = M
 function step!(M::GDApproxLineSearch, f, ∇f, x)
     @unpack α, approx_line_search = M
-
     g = ∇f(x)
     α = approx_line_search(f, ∇f, x, -g, α)
-    # println(α)
     return x - α * g 
 end

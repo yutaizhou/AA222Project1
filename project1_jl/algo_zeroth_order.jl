@@ -17,6 +17,48 @@ function solve(M::ZerothOrder, f, x0, max_iters; num_eval_termination=true)
     end 
     return x, x_hist
 end
+
+# Coordinate Descent
+@with_kw mutable struct CoordinateDescentAcceleration <: ZerothOrder
+    ϵ = 1e-4
+    approx_line_search = backtracking_line_search
+    n = nothing
+end
+function init!(M::CoordinateDescentAcceleration, f, x)
+    M.n = length(x)
+end
+function step!(M::CoordinateDescentAcceleration, f, ∇f, x)
+    @unpack ϵ, n, approx_line_search = M
+    terminate = false
+
+    x_old = copy(x)
+    for i in 1:n
+        d = basis(i,n)
+        α = backtracking_line_search(f, ∇f, x, d, 1e-2)
+        x += α * d
+    end
+    α = backtracking_line_search(f, ∇f, x, x - x_old, 1e-2)
+    x += α * (x - x_old)
+
+    if abs(norm(x - x_old)) <= ϵ
+        terminate = true
+    end
+    return x, terminate
+end
+
+function solve(M::CoordinateDescentAcceleration, f, ∇f, x0, max_iters; num_eval_termination=true)
+    init!(M, f, x0)
+    x_hist = [x0]
+    x, terminate = x0, false
+    while !terminate 
+        x, terminate = step!(M, f, ∇f, x)
+        push!(x_hist, x)
+        if num_eval_termination && (COUNTERS[string(f)] >= max_iters - M.evals_per_iter)
+            break
+        end
+    end
+
+    return x, x_hist
 end
 
 # Hooke Jeeves
