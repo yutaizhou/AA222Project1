@@ -145,3 +145,20 @@ function solve(M::HookeJeevesDynamic, f, x, max_iters; num_eval_termination=true
     return x, x_hist
 end
 
+# one-off function to generate cool plot. do not actually use it.
+function solve_diag(M::HookeJeevesDynamic, f, x, max_iters; num_eval_termination=true)
+    init!(M, x)
+    M.D = [[√2, √2], [-√2, -√2], [-√2, √2], [√2, -√2]]
+    x_hist = [x]
+    y, terminate, idx_best = f(x), false, 1
+
+    while !terminate
+        x, y, terminate, idx_best = step!(M, f, x, y, idx_best)
+        push!(x_hist, x)
+
+        if num_eval_termination && (count(f) >= max_iters - M.evals_per_iter)
+            break
+        end
+    end
+    return x, x_hist
+end
