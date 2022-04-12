@@ -112,9 +112,7 @@ function step!(M::HookeJeevesDynamic, f, x, y, idx_best_prev)
     x_best, y_best = x, y 
     d_best_prev = M.D[idx_best_prev]
     M.D = pushfirst!(deleteat!(M.D, idx_best_prev), d_best_prev)
-    D_best_prev = D[idx_best_prev]
-    D = pushfirst!(deleteat!(D, idx_best_prev), D_best_prev)
-    xs_new = [x + d for d in D]
+    xs_new = [x + α * d for d in M.D]
 
     for (idx, x_new) in enumerate(xs_new)
         y_new = f(x_new)
