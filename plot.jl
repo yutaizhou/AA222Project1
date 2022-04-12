@@ -2,10 +2,10 @@
 using Dates
 using DrWatson
 using Plots
-include("algo_zeroth_order.jl")
-include("algo_first_order.jl")
-include("helpers.jl")
-include("simple.jl")
+include("project1_jl/algo_zeroth_order.jl")
+include("project1_jl/algo_first_order.jl")
+include("project1_jl/helpers.jl")
+include("project1_jl/simple.jl")
 
 time_now = Dates.format(now(), "Y-mm-dd-HH:MM:SS")
 outputdir(args...) = projectdir("output", args...)

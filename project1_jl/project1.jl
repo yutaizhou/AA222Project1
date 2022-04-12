@@ -1,5 +1,3 @@
-using DrWatson
-@quickactivate
 #=
         project1.jl -- This is where the magic happens!
 
@@ -27,11 +25,9 @@ using DrWatson
 
 # Example
 # include("myfile.jl")
-using Dates, DataFrames
 include("algo_zeroth_order.jl")
 include("algo_first_order.jl")
 include("algo_util.jl")
-include("plot.jl")
 
 
 """
@@ -49,32 +45,41 @@ Returns:
 """
 function optimize(f, ∇f, x0, n, prob_name)
 
-    if prob_name == "simple10"
-        method = GDMomentumNesterov(α=3e-4, β=0.8)
-        x, _ = solve(method, f, ∇f, x0, n/2)
-
-    elseif prob_name == "simple20"
-        method = HookeJeeves(α=1.0)
+    if prob_name == "simple1"
+        method = HookeJeevesDynamic(α=0.3)
         x, _ = solve(method, f, x0, n)
 
-    elseif prob_name == "simple30"
-        method = GDMomentumNesterov(α=1e-3, β=0.9)
-        x, _ = solve(method, f, ∇f, x0, n)
+    elseif prob_name == "simple2" 
+        method = HookeJeevesDynamic(α=0.3)
+        x, _ = solve(method, f, x0, n)
 
-    else
-        # method = GradientDescent(3e-3)
-        # method = GDMomentum(α=3e-4, β=0.9)
-        # method = GDMomentumNesterov(α=1e-3, β=0.9)
-        # method = Adam(α=3e-4, v_decay=0.6)
-        # method = GDApproxLineSearch()
-
-        # x, _ = solve(method, f, ∇f, x0, n)
+    elseif prob_name == "simple3"
+        method = HookeJeevesDynamic(α=0.3)
+        x, _ = solve(method, f, x0, n)
         
-        method = HookeJeeves(α=1.0)
+    elseif prob_name == "secret1"
+        method = HookeJeevesDynamic(α=0.3)
         x, _ = solve(method, f, x0, n)
+    elseif prob_name == "secret2"
+        method = HookeJeevesDynamic(α=0.3)
+        x, _ = solve(method, f, x0, n)
+    else
+        # method = GradientDescent(3e-4)
+        # method = GDMomentum(α=3e-4, β=0.95)
+        # method = GDMomentumNesterov(α=3e-4, β=0.6)
+        method = Adam(α=3e-4)
+        # method = GDApproxLineSearch(α=3e-4)
 
-        # method = HookeJeevesDynamic(α=1.0, γ=0.7)
+        x, _ = solve(method, f, ∇f, x0, n)
+        
+        # method = HookeJeeves(α=1.0)
         # x, _ = solve(method, f, x0, n)
+
+        # method = HookeJeevesDynamic(α=0.3)
+        # x, _ = solve(method, f, x0, n)
+
+        # method = CoordinateDescentAcceleration()
+        # x, x_hist = solve(method, f, ∇f, x0, 5; num_eval_termination=false)
     end
         # println("Pre: $(round.(x0; digits=3)) -> $(round(f(x0); digits=3))")
         # println("Pos: $(round.(x; digits=3)) -> $(round(f(x); digits=3)) \n")

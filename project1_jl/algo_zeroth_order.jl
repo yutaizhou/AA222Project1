@@ -1,4 +1,3 @@
-using Parameters
 include("helpers.jl")
 include("algo_util.jl")
 
@@ -19,7 +18,7 @@ function solve(M::ZerothOrder, f, x0, max_iters; num_eval_termination=true)
 end
 
 # Coordinate Descent
-@with_kw mutable struct CoordinateDescentAcceleration <: ZerothOrder
+Base.@kwdef mutable struct CoordinateDescentAcceleration <: ZerothOrder
     ϵ = 1e-4
     approx_line_search = backtracking_line_search
     n = nothing
@@ -28,7 +27,7 @@ function init!(M::CoordinateDescentAcceleration, f, x)
     M.n = length(x)
 end
 function step!(M::CoordinateDescentAcceleration, f, ∇f, x)
-    @unpack ϵ, n, approx_line_search = M
+    ϵ, n, approx_line_search = M.ϵ, M.n, M.approx_line_search
     terminate = false
 
     x_old = copy(x)
@@ -57,12 +56,11 @@ function solve(M::CoordinateDescentAcceleration, f, ∇f, x0, max_iters; num_eva
             break
         end
     end
-
     return x, x_hist
 end
 
 # Hooke Jeeves
-@with_kw mutable struct HookeJeeves <: ZerothOrder
+Base.@kwdef mutable struct HookeJeeves <: ZerothOrder
     α = 1e-2
     ϵ = 1e-4
     γ = 0.5
@@ -74,7 +72,7 @@ function init!(M::HookeJeeves, f, x)
     M.evals_per_iter = 2 * M.n
 end
 function step!(M::HookeJeeves, f, x, y)
-    @unpack α, ϵ, γ, n = M
+    α, ϵ, γ, n = M.α, M.ϵ, M.γ, M.n
     improved, terminate = false, false
 
     x_best, y_best = x, y 
@@ -94,7 +92,7 @@ function step!(M::HookeJeeves, f, x, y)
 end
 
 # Hooke Jeeves Dynamic w/ Eager execution
-@with_kw mutable struct HookeJeevesDynamic <: ZerothOrder
+Base.@kwdef mutable struct HookeJeevesDynamic <: ZerothOrder
     α = 1e-2
     ϵ = 1e-4
     γ = 0.5
@@ -108,10 +106,12 @@ function init!(M::HookeJeevesDynamic, f, x)
     M.D = [sgn * basis(i, M.n) for i in 1:M.n for sgn in (-1, +1)]
 end
 function step!(M::HookeJeevesDynamic, f, x, y, idx_best_prev)
-    @unpack α, ϵ, γ, n, D = M
+    α, ϵ, γ = M.α, M.ϵ, M.γ
     improved, terminate, idx_best = false, false, 1
 
     x_best, y_best = x, y 
+    d_best_prev = M.D[idx_best_prev]
+    M.D = pushfirst!(deleteat!(M.D, idx_best_prev), d_best_prev)
     D_best_prev = D[idx_best_prev]
     D = pushfirst!(deleteat!(D, idx_best_prev), D_best_prev)
     xs_new = [x + d for d in D]
