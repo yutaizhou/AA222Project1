@@ -46,7 +46,7 @@ Returns:
 function optimize(f, ∇f, x0, n, prob_name)
 
     if prob_name == "simple1"
-        method = HookeJeevesDynamic(α=0.3)
+        method = HookeJeevesDynamic(α=0.3, γ=0.3)
         x, _ = solve(method, f, x0, n)
 
     elseif prob_name == "simple2" 
@@ -58,11 +58,13 @@ function optimize(f, ∇f, x0, n, prob_name)
         x, _ = solve(method, f, x0, n)
         
     elseif prob_name == "secret1"
-        method = HookeJeevesDynamic(α=0.3)
+        method = HookeJeevesDynamic(α=0.5, γ=0.5)
         x, _ = solve(method, f, x0, n)
+
     elseif prob_name == "secret2"
-        method = HookeJeevesDynamic(α=0.3)
+        method = HookeJeevesDynamic(α=1.0, γ = 0.3)
         x, _ = solve(method, f, x0, n)
+
     else
         # method = GradientDescent(3e-4)
         # method = GDMomentum(α=3e-4, β=0.95)
